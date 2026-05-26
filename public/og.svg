@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0a0e14"/>
+      <stop offset="1" stop-color="#161b22"/>
+    </linearGradient>
+    <linearGradient id="brand" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#58a6ff"/>
+      <stop offset="1" stop-color="#7ee787"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- subtle grid -->
+  <g opacity="0.06" stroke="#58a6ff" stroke-width="1">
+    <line x1="0" y1="160" x2="1200" y2="160"/>
+    <line x1="0" y1="320" x2="1200" y2="320"/>
+    <line x1="0" y1="480" x2="1200" y2="480"/>
+  </g>
+
+  <!-- paw mark -->
+  <g transform="translate(80, 80)">
+    <g fill="url(#brand)">
+      <ellipse cx="22" cy="32" rx="11" ry="14"/>
+      <ellipse cx="52" cy="18" rx="11" ry="14"/>
+      <ellipse cx="82" cy="18" rx="11" ry="14"/>
+      <ellipse cx="112" cy="32" rx="11" ry="14"/>
+      <path d="M65 50c-22 0-36 18-36 36 0 12 10 22 22 22 8 0 11-5 14-5s6 5 14 5c12 0 22-10 22-22 0-18-14-36-36-36z"/>
+    </g>
+  </g>
+
+  <text x="220" y="135" font-family="-apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif" font-size="34" fill="#8b949e" font-weight="600">
+    냥사원의 SSE 분투기
+  </text>
+
+  <text x="80" y="260" font-family="-apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif" font-size="72" fill="#e6edf3" font-weight="800">
+    챗봇은 왜
+  </text>
+  <text x="80" y="360" font-family="-apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif" font-size="120" fill="url(#brand)" font-weight="900">
+    또르륵
+  </text>
+  <text x="500" y="360" font-family="-apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif" font-size="72" fill="#e6edf3" font-weight="800">
+    말을 못 했을까.
+  </text>
+
+  <text x="80" y="430" font-family="-apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif" font-size="28" fill="#c9d1d9" font-weight="400">
+    Server-Sent Events 한국어 인터랙티브 가이드 · 5에피소드 · 약 50분
+  </text>
+
+  <!-- chips -->
+  <g transform="translate(80, 480)">
+    <rect x="0" y="0" width="200" height="46" rx="23" fill="#21262d" stroke="#2a3038"/>
+    <text x="100" y="30" font-family="-apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif" font-size="20" fill="#58a6ff" text-anchor="middle" font-weight="600">EventSource</text>
+
+    <rect x="220" y="0" width="220" height="46" rx="23" fill="#21262d" stroke="#2a3038"/>
+    <text x="330" y="30" font-family="-apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif" font-size="20" fill="#7ee787" text-anchor="middle" font-weight="600">Last-Event-ID</text>
+
+    <rect x="460" y="0" width="240" height="46" rx="23" fill="#21262d" stroke="#2a3038"/>
+    <text x="580" y="30" font-family="-apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif" font-size="20" fill="#f0883e" text-anchor="middle" font-weight="600">자동 재연결</text>
+
+    <rect x="720" y="0" width="220" height="46" rx="23" fill="#21262d" stroke="#2a3038"/>
+    <text x="830" y="30" font-family="-apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif" font-size="20" fill="#d2a8ff" text-anchor="middle" font-weight="600">LLM 스트리밍</text>
+  </g>
+
+  <text x="80" y="588" font-family="-apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif" font-size="20" fill="#6e7681" font-weight="500">
+    junhee1219.github.io/sse-study
+  </text>
+</svg>

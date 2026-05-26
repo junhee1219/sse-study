@@ -4,6 +4,21 @@ import { chapterBySlug, chapters } from '../chapters'
 import { NotFound } from './NotFound'
 import styles from './ChapterPage.module.css'
 
+function setMetaDescription(content: string) {
+  const el = document.querySelector('meta[name="description"]')
+  if (el) el.setAttribute('content', content)
+}
+
+function setMetaProperty(name: string, content: string) {
+  const el = document.querySelector(`meta[property="${name}"]`)
+  if (el) el.setAttribute('content', content)
+}
+
+function setMetaName(name: string, content: string) {
+  const el = document.querySelector(`meta[name="${name}"]`)
+  if (el) el.setAttribute('content', content)
+}
+
 type Props = {
   slug: string
 }
@@ -14,6 +29,21 @@ export function ChapterPage({ slug }: Props) {
   useEffect(() => {
     window.scrollTo({ top: 0 })
   }, [slug])
+
+  useEffect(() => {
+    if (!chapter) return
+    const fullTitle = `Ep.${chapter.number} ${chapter.title} — 냥사원의 SSE 분투기`
+    document.title = fullTitle
+    setMetaDescription(`${chapter.subtitle}. Server-Sent Events 한국어 인터랙티브 가이드 ${chapter.number}화.`)
+    setMetaProperty('og:title', fullTitle)
+    setMetaProperty('og:description', chapter.subtitle)
+    setMetaProperty('og:url', `https://junhee1219.github.io/sse-study/#/chapters/${chapter.slug}`)
+    setMetaName('twitter:title', fullTitle)
+    setMetaName('twitter:description', chapter.subtitle)
+    return () => {
+      document.title = '냥사원의 SSE 분투기 — Server-Sent Events 한국어 인터랙티브 가이드'
+    }
+  }, [chapter])
 
   if (!chapter) return <NotFound />
 

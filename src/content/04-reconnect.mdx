@@ -1,9 +1,190 @@
+import { ReconnectSim } from '../components/ReconnectSim'
+import { Terminal } from '../components/Terminal'
 import { Callout } from '../components/Callout'
+import { Quiz } from '../components/Quiz'
 
-## 작성 중
+## 수요일 오후, 회의실의 사고
 
-수요일, 데모 도중에 wifi가 잠깐 끊긴 냥사원. 다시 잡혔는데 메시지가 어디서부터 다시 와야 하지? `Last-Event-ID` 헤더와 `retry:` 라인이 등장한다. 끊기 버튼을 실제로 눌러보면서 재연결을 확인한다.
+수요일 3시. 임원진 앞에서 챗봇 데모. 냥사원은 노트북을 펼치고 자신 있게 채팅창에 "안녕!"을 입력한다. 응답이 또르륵 또르륵 흘러나오기 시작한다. 분위기 좋다.
 
-<Callout tone="info" title="준비 중">
-이 화는 아직 냥사원이 wifi와 싸우고 있어요. 곧 만나요.
+그런데 갑자기 회의실 와이파이가 잠깐 깜빡 끊긴다. 챗봇 응답도 멈춘다.
+
+식은땀이 식 차오르려는 순간, 와이파이가 다시 잡힌다. 그리고 **챗봇 응답이 알아서 다시 또르륵 나오기 시작**한다. 끊긴 지점에서.
+
+<Callout tone="story">
+"어? 이거 제가 재연결 코드 안 짰는데요? 게다가 끊긴 지점부터 다시 나오는 건 뭐죠? 마법인가요?"
 </Callout>
+
+회의가 끝나고 자리로 돌아오는 길에 냥부장이 어깨를 툭 친다.
+
+<Callout tone="boss">
+"마법 아니야. 네가 어제 본 `id:` 라인 기억나? 그게 책갈피야. 그리고 EventSource는 끊기면 알아서 재접속하면서 그 책갈피를 다시 보내. 이게 SSE가 진짜 좋은 이유 중 하나야."
+</Callout>
+
+## 두 가지 마법이 동시에 일어났다
+
+회의실에서 일어난 일을 풀어보면 이렇다.
+
+1. **자동 재연결**: 연결이 끊기면 EventSource는 `retry:` 간격(기본 약 3초) 후에 같은 URL에 GET을 다시 보낸다. 우리가 코드 한 줄도 안 짜도 자동.
+2. **Last-Event-ID 헤더**: 재연결 GET에는 자동으로 `Last-Event-ID: <마지막 받은 id>` 헤더가 붙는다. 서버는 그걸 보고 "아 이 클라는 N번까지 받았구만, N+1부터 보내야겠네" 하고 골라서 보낸다.
+
+핵심은: **둘 다 우리가 안 짠다.** 첫 번째는 브라우저가, 두 번째는 서버가 한다 (단, 서버가 `id:` 라인을 박아줬을 때만).
+
+<Callout tone="success" title="이 화의 핵심">
+SSE는 두 가지를 "공짜로" 준다 — **자동 재연결**(브라우저가)과 **재개 지점 식별**(`id:` + `Last-Event-ID` 페어). 서버가 메시지마다 `id:`만 박아주면, 끊겼다 잡혀도 클라이언트는 똑같은 흐름으로 메시지를 받는다.
+</Callout>
+
+## 직접 만져보기 — 끊고 재연결
+
+서버가 1.1초마다 메시지 한 개씩 흘려보낸다. **"와이파이 끊기 ⚡"** 버튼을 메시지 흐르는 중에 눌러보자. 2.5초 후 자동 재연결되면서 Last-Event-ID 헤더가 붙고, 서버가 끊긴 다음부터 다시 보내는 모습이 그대로 보인다.
+
+서버가 헤더를 무시하는 경우도 시뮬레이션할 수 있게 토글을 달았다 (체크 해제 → 메시지 유실).
+
+<ReconnectSim />
+
+<Callout tone="info" title="관찰 포인트 1: Last-Event-ID 헤더가 자동으로 붙는다">
+처음 GET에는 헤더가 없다. 한 번 끊겼다 재연결되는 순간 왼쪽 박스의 `Last-Event-ID:` 라인이 강조된다. **클라가 보낸 게 아니다 — 브라우저가 자동으로 붙여서 보낸 것**.
+</Callout>
+
+<Callout tone="info" title="관찰 포인트 2: id가 책갈피 역할">
+끊기 전 마지막으로 받은 id가 5번이었다면, 재연결 후 서버는 6번부터 보낸다. 메시지 카운터(아래 dot 표시)가 끊김 없이 이어진다.
+</Callout>
+
+<Callout tone="danger" title="관찰 포인트 3: 서버가 헤더를 안 받으면?">
+"서버가 Last-Event-ID 받고…" 토글을 끄고 다시 끊어보자. 서버는 헤더를 무시하고 마지막 메시지부터 보낸다 — **중간 메시지 유실**. 즉, SSE의 재개 마법은 **서버가 협조해줘야 동작**한다.
+</Callout>
+
+## 서버는 어떻게 협조해야 하는가
+
+스펙적으로 클라이언트는 `Last-Event-ID` 헤더를 자동으로 보낸다. 그러면 서버는 보통 이런 흐름이다.
+
+<Terminal
+  title="서버 측 의사코드 (Node.js Express 예시)"
+  lines={[
+    { type: 'output', text: 'app.get("/api/chat", (req, res) => {' },
+    { type: 'output', text: '  res.setHeader("Content-Type", "text/event-stream");' },
+    { type: 'output', text: '' },
+    { type: 'output', text: '  // 재연결인지 확인' },
+    { type: 'output', text: '  const lastId = parseInt(req.headers["last-event-id"] || "0");' },
+    { type: 'output', text: '' },
+    { type: 'output', text: '  for (const msg of pickMessagesAfter(lastId)) {' },
+    { type: 'output', text: '    res.write(`id: ${msg.id}\\n`);' },
+    { type: 'output', text: '    res.write(`data: ${msg.text}\\n\\n`);' },
+    { type: 'output', text: '  }' },
+    { type: 'output', text: '' },
+    { type: 'output', text: '  // 새로 생기는 메시지들도 같은 방식으로 스트리밍' },
+    { type: 'output', text: '  onNewMessage((msg) => {' },
+    { type: 'output', text: '    res.write(`id: ${msg.id}\\n`);' },
+    { type: 'output', text: '    res.write(`data: ${msg.text}\\n\\n`);' },
+    { type: 'output', text: '  });' },
+    { type: 'output', text: '});' },
+  ]}
+/>
+
+요점:
+
+- 메시지마다 `id:` 박아주기 (책갈피 만들기)
+- 재연결 GET이 오면 `Last-Event-ID` 헤더 보기
+- 그 id 이후의 메시지를 모아서 먼저 보내고, 그 뒤로 평소처럼 스트리밍 이어가기
+
+이걸 안 하면 클라가 헤더는 보내지만 서버는 무시하고, 끊긴 동안 발생한 메시지는 유실된다.
+
+<Callout tone="senior">
+"이 부분은 보통 'idempotent한 메시지 저장소' 같은 거랑 함께 설계해. 메모리에만 있다가 서버 재시작하면 사라지는 메시지면 의미 없거든. 우리 회사도 작년에 그것 때문에 한 번 갈아엎었어 — 처음에 메모리 큐로 했다가 sticky session 때문에 한 노드 죽으면 클라가 다른 노드로 가서 'Last-Event-ID: 42' 해도 그 노드는 42를 모르니까 무용지물."
+</Callout>
+
+## `retry:` 라인의 정체
+
+3화에서 잠깐 본 `retry:` 라인. 이게 재연결 간격을 제어한다.
+
+<Terminal
+  title="서버가 재시도 텀포를 알려줌"
+  lines={[
+    { type: 'output', text: 'retry: 5000' },
+    { type: 'output', text: 'data: 첫 메시지' },
+    { type: 'output', text: '' },
+    { type: 'comment', text: '이 스트림이 끊기면 5초 후에 재연결 시도' },
+  ]}
+/>
+
+용도:
+
+- 평소엔 브라우저 기본(약 3초)이 무난함
+- 서버가 과부하 걸렸을 때 클라들이 일제히 우르르 재접속 오는 걸 막고 싶으면 `retry: 30000` 같은 식으로 늘림
+- 반대로 빠른 재연결이 필요하면 짧게 (단, 모든 클라가 동시에 끊겼을 때 thundering herd 위험)
+
+## 한 가지 함정: id가 없으면 책갈피도 없다
+
+자주 보는 실수.
+
+<Callout tone="danger">
+서버가 `data:` 라인만 보내고 `id:`를 안 박으면, 클라이언트가 `Last-Event-ID` 헤더를 보내려고 해도 보낼 게 없다 (`""` 또는 빈 값). 결과적으로 **재연결은 되지만 책갈피는 없어서 메시지 유실 가능성**이 생긴다. 챗봇 토큰처럼 정밀하게 이어붙여야 하는 데이터라면 id 박는 게 필수.
+</Callout>
+
+## 정리: 끊김에 대한 SSE의 약속
+
+| 누가 | 무엇을 |
+|---|---|
+| 브라우저 | 끊기면 `retry:` 간격 후 자동 재연결 |
+| 브라우저 | 재연결 GET에 `Last-Event-ID` 헤더 자동으로 붙임 |
+| 서버 | 메시지마다 `id:` 박는다 |
+| 서버 | `Last-Event-ID` 헤더 보고 그 다음 메시지부터 보낸다 |
+| 서버 (옵션) | `retry:` 라인으로 재시도 간격 조절 |
+
+이 약속을 양쪽 다 지키면, 클라이언트는 끊김을 사실상 못 느낀다. **회의실 와이파이가 잠깐 끊겨도 데모는 계속 굴러간다**.
+
+## 이해도 확인
+
+<Quiz
+  questions={[
+    {
+      id: 'q1',
+      prompt: 'EventSource가 끊긴 후 재연결 GET을 보낼 때, Last-Event-ID 헤더는 누가 채워서 보내나?',
+      choices: [
+        { id: 'a', text: '서버가 응답 헤더에 박아서 보내준다' },
+        { id: 'b', text: '클라이언트 코드에서 직접 헤더를 붙여 보낸다' },
+        { id: 'c', text: '브라우저가 자동으로 (마지막으로 받은 `id:` 값을) 붙여서 보낸다' },
+        { id: 'd', text: '아무도 안 보낸다 — Last-Event-ID는 사용자 코드가 따로 관리해야 한다' },
+      ],
+      answer: 'c',
+      explain:
+        'EventSource는 마지막으로 받은 `id:` 값을 내부에 저장해뒀다가 재연결 GET 헤더에 자동으로 박는다. 사용자 코드가 손댈 일 없음.',
+    },
+    {
+      id: 'q2',
+      prompt: '서버가 메시지에 `id:` 라인을 안 박는다면 어떻게 되나?',
+      choices: [
+        { id: 'a', text: '재연결 자체가 안 일어난다' },
+        { id: 'b', text: '재연결은 일어나지만 끊긴 동안의 메시지를 복구할 방법이 없다' },
+        { id: 'c', text: 'EventSource가 에러를 던지고 멈춘다' },
+        { id: 'd', text: '서버가 자동으로 id를 생성해서 채워준다' },
+      ],
+      answer: 'b',
+      explain:
+        '재연결은 어차피 일어난다(끊기면 자동). 단지 책갈피가 없어서 서버가 어디서부터 보내야 할지 모를 뿐. 토큰처럼 정밀한 데이터엔 필수.',
+    },
+    {
+      id: 'q3',
+      prompt: '서버가 갑자기 트래픽 폭증을 받아 클라들이 재접속 폭풍을 일으킬까 봐 걱정된다. 어떻게 대응하나?',
+      choices: [
+        { id: 'a', text: '서버가 응답에 `retry: 30000` 같은 라인을 흘려보내서 재시도 간격을 늘린다' },
+        { id: 'b', text: '클라이언트 코드에서 setTimeout으로 직접 지연시킨다' },
+        { id: 'c', text: 'EventSource를 닫고 새로 만든다' },
+        { id: 'd', text: '서버에서 응답을 닫지 않는다' },
+      ],
+      answer: 'a',
+      explain:
+        '`retry:` 라인이 정확히 이 용도다. 서버가 클라이언트들의 재시도 텀포를 한 줄로 제어할 수 있는 게 SSE의 작지만 강력한 장점.',
+    },
+  ]}
+/>
+
+## 다음 화 예고
+
+목요일 오전. 회의실 데모도 살아남았겠다, 이제 진짜 배포만 남았다. 냥사원이 PR을 올리려고 하는데, 옆에서 냥차장이 의자를 끌고 와 앉는다.
+
+<Callout tone="senior">
+"잠깐, 운영 들어가기 전에 우리가 작년에 한 번씩 다 밟아본 함정들 짚고 가자. nginx 버퍼링부터 시작해서 EventSource가 헤더 못 박는 거, HTTP/2, CORS, 멀티탭… 다섯 개야. 5분만 줘."
+</Callout>
+
+마지막 화에서 실전 함정 5종 + 완성된 또르륵 챗봇을 보자.

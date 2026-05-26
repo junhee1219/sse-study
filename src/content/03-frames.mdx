@@ -1,9 +1,183 @@
+import { FrameBuilder } from '../components/FrameBuilder'
+import { Terminal } from '../components/Terminal'
 import { Callout } from '../components/Callout'
+import { Quiz } from '../components/Quiz'
 
-## 작성 중
+## 화요일 오전, 정수기 앞
 
-화요일 오전, 냥사원 옆자리에 앉은 냥차장이 모니터를 슬쩍 본다. "어, `data:` 말고도 `event:`, `id:`, `retry:` 라인 있는 거 알아? 이거 알아두면 진짜 편해." 4가지 라인이 뭐 하는지, 그리고 직접 메시지 빌더로 조립해보며 확인한다.
+어제 클라이언트도 한 줄로 끝났다(`new EventSource(url)`). 냥사원은 자신감 충만한 상태로 화요일 출근. 정수기에서 물을 따르는데 옆에서 냥차장이 슬쩍 자기 텀블러를 들이민다.
 
-<Callout tone="info" title="준비 중">
-이 화는 아직 냥차장이 화이트보드 그리고 있어요. 곧 만나요.
+<Callout tone="senior">
+"어제 보니까 너 `data:` 만 쓰던데. 사실 SSE 라인이 4개야. `data:`, `event:`, `id:`, `retry:`. 이거 알아두면 챗봇 진짜 깔끔해져."
 </Callout>
+
+냥사원이 노트북을 꺼낸다.
+
+## 4가지 라인 한눈에
+
+스펙상 한 메시지는 다음 4가지 라인의 조합으로 구성된다. **`data:`만 필수**, 나머지는 선택.
+
+| 라인 | 역할 | 어디서 보이나 |
+|---|---|---|
+| `data:` | 본문. 클라에서 `e.data`로 받음. 여러 줄도 됨 | 거의 모든 메시지 |
+| `event:` | 이벤트 이름. 기본 'message', 커스텀 이름이면 `addEventListener` 필요 | 토큰/완료/에러 등 종류 구분할 때 |
+| `id:` | 메시지 ID. 클라가 끊겼다 재접속할 때 `Last-Event-ID` 헤더로 다시 보냄 | 재개 지점이 필요할 때 (Ep.4) |
+| `retry:` | 재연결 간격 (ms). 브라우저 기본 약 3초를 덮어씀 | 서버가 클라 재시도 텀포를 제어할 때 |
+
+각 라인은 `key: value` 형태. `key:` 뒤 공백 1칸은 관습이지만 없어도 동작한다. **메시지 경계는 항상 빈 줄(`\n\n`)**.
+
+## 직접 만져보기 — 메시지 빌더
+
+아래에서 4가지 라인을 토글하고 값을 바꿔보자. 왼쪽 컨트롤을 건드릴 때마다 오른쪽이 두 군데에서 실시간으로 갱신된다.
+
+- **위쪽**: 네트워크로 흐를 raw SSE 텍스트 (서버가 실제로 보내는 바이트)
+- **아래쪽**: 그걸 받는 클라이언트 코드 + console 출력 시뮬레이션
+
+<FrameBuilder />
+
+<Callout tone="info" title="관찰 포인트: event 라인을 켜보자">
+`event:` 토글을 켜고 `token`이라고 적어보자. 클라이언트 코드가 `es.onmessage` 대신 `es.addEventListener("token", ...)`로 바뀐다. **커스텀 이벤트 이름은 `onmessage`로 안 잡힌다** — 별도 리스너 필요.
+</Callout>
+
+## 실전 예: 챗봇의 4가지 이벤트 타입
+
+`event:` 라인의 진가는 같은 스트림에서 **여러 종류의 메시지**를 흘려보낼 때 드러난다. 챗봇에선 이런 패턴이 흔하다.
+
+<Terminal
+  title="실전 챗봇 SSE 스트림"
+  lines={[
+    { type: 'output', text: 'event: token' },
+    { type: 'output', text: 'data: 안' },
+    { type: 'output', text: '' },
+    { type: 'output', text: 'event: token' },
+    { type: 'output', text: 'data: 녕' },
+    { type: 'output', text: '' },
+    { type: 'output', text: 'event: token' },
+    { type: 'output', text: 'data: 하' },
+    { type: 'output', text: '' },
+    { type: 'output', text: 'event: tool_call' },
+    { type: 'output', text: 'data: {"name":"search","query":"오늘 날씨"}' },
+    { type: 'output', text: '' },
+    { type: 'output', text: 'event: done' },
+    { type: 'output', text: 'data: {"tokens":42,"finish_reason":"stop"}' },
+    { type: 'output', text: '' },
+    { type: 'comment', text: '한 스트림에서 token / tool_call / done 세 종류를 흘려보냄' },
+  ]}
+/>
+
+클라이언트는 이렇게 나눠 받는다.
+
+<Terminal
+  title="이벤트 타입별 리스너"
+  lines={[
+    { type: 'output', text: 'const es = new EventSource("/api/chat");' },
+    { type: 'output', text: '' },
+    { type: 'output', text: 'es.addEventListener("token", (e) => {' },
+    { type: 'output', text: '  appendToChat(e.data);            // UI에 글자 추가' },
+    { type: 'output', text: '});' },
+    { type: 'output', text: '' },
+    { type: 'output', text: 'es.addEventListener("tool_call", (e) => {' },
+    { type: 'output', text: '  const tool = JSON.parse(e.data);' },
+    { type: 'output', text: '  showToolBadge(tool.name);        // "도구 호출 중..." 뱃지' },
+    { type: 'output', text: '});' },
+    { type: 'output', text: '' },
+    { type: 'output', text: 'es.addEventListener("done", (e) => {' },
+    { type: 'output', text: '  const stats = JSON.parse(e.data);' },
+    { type: 'output', text: '  showStats(stats);' },
+    { type: 'output', text: '  es.close();' },
+    { type: 'output', text: '});' },
+  ]}
+/>
+
+만약 `event:` 라인 없이 모두 `message`로 받았다면, `e.data`를 매번 JSON 파싱해서 type 필드를 보고 분기해야 한다. **`event:` 한 줄로 그 분기를 서버가 대신 해주는 셈**.
+
+<Callout tone="aha">
+"아하, 그래서 event 라인을 쓰는 거구나. 같은 connection에서 종류가 다른 메시지를 흘려보낼 때 클라이언트 코드를 깔끔하게 나눌 수 있게."
+</Callout>
+
+## `id:` 와 `retry:` 는 다음 화에서 자세히
+
+`id:` 와 `retry:` 는 **연결이 끊겼다가 되살아날 때** 진가가 나온다. 이건 4화의 주제니까, 여기선 "그런 라인이 있다"만 알고 넘어가자.
+
+<Callout tone="senior">
+"`id:`는 일종의 책갈피야. 클라가 끊겼다가 재접속할 때 'Last-Event-ID: 42' 헤더로 다시 보내면, 서버가 '아 42 다음부터 보내면 되겠네' 하고 골라서 재전송할 수 있어. 4화에서 실제로 끊어볼 거니까 그때 보자."
+</Callout>
+
+## 한 가지 함정: comment 라인
+
+스펙엔 또 하나 숨겨진 형태가 있다. **콜론(`:`)으로 시작하는 라인은 comment**다.
+
+<Terminal
+  title="comment 라인"
+  lines={[
+    { type: 'output', text: ': 이 줄은 무시됨 (서버↔클라 keep-alive ping 용도로 자주 쓰임)' },
+    { type: 'output', text: '' },
+    { type: 'output', text: 'data: 실제 메시지' },
+    { type: 'output', text: '' },
+  ]}
+/>
+
+실전에선 nginx/proxy가 일정 시간 트래픽 없으면 연결 끊는 걸 막으려고, 서버가 **15초마다 `:keep-alive\n\n` 같은 comment를 흘려보내는 패턴**이 흔하다. 클라는 무시하고, 프록시는 "아 살아있구만" 하고 연결 유지.
+
+## 라인 파싱 룰 한 줄 요약
+
+스펙은 이렇게 줄여 외울 수 있다.
+
+<Callout tone="success" title="한 줄 룰">
+한 라인은 콜론(`:`) 기준으로 `field: value` 로 쪼개진다. **콜론이 첫 글자면 comment, 콜론이 없으면 field만 있는 라인** (거의 안 씀). value 앞 공백 1칸은 관습적으로 떼서 처리한다. 빈 줄이 오면 모아둔 라인들을 합쳐 메시지 한 개를 발사하고 버퍼를 비운다.
+</Callout>
+
+## 이해도 확인
+
+<Quiz
+  questions={[
+    {
+      id: 'q1',
+      prompt: '`event: bookmark\\ndata: page-42\\n\\n` 을 받았다. 클라이언트는 어떻게 받아야 하는가?',
+      choices: [
+        { id: 'a', text: 'es.onmessage = (e) => ... — 모든 이벤트는 onmessage로 옴' },
+        { id: 'b', text: 'es.addEventListener("bookmark", (e) => ...) — 커스텀 이름은 별도 리스너' },
+        { id: 'c', text: 'es.addEventListener("data", ...) — data 라인을 키로 사용' },
+        { id: 'd', text: 'es.onbookmark = (e) => ... — 이벤트 이름은 자동 메서드가 됨' },
+      ],
+      answer: 'b',
+      explain:
+        '`event:` 라인이 있으면 그 이름이 dispatch될 이벤트 이름이 된다. `onmessage`는 기본 message 이벤트만 잡으므로, 커스텀 이름은 `addEventListener`로 등록해야 한다.',
+    },
+    {
+      id: 'q2',
+      prompt: '다음 중 SSE 라인이 *아닌* 것은?',
+      choices: [
+        { id: 'a', text: 'data:' },
+        { id: 'b', text: 'event:' },
+        { id: 'c', text: 'id:' },
+        { id: 'd', text: 'timeout:' },
+        { id: 'e', text: 'retry:' },
+      ],
+      answer: 'd',
+      explain:
+        '`timeout:` 은 SSE 스펙에 없는 라인. 표준 4종은 data / event / id / retry. (timeout 비슷한 역할은 `retry:` 가 한다.)',
+    },
+    {
+      id: 'q3',
+      prompt: '서버가 `: keep-alive\\n\\n` 를 30초마다 보낸다. 클라이언트는 무엇을 받게 되나?',
+      choices: [
+        { id: 'a', text: '`keep-alive`라는 데이터의 message 이벤트' },
+        { id: 'b', text: '아무 이벤트도 받지 않는다 (comment 라인이라 무시됨)' },
+        { id: 'c', text: 'error 이벤트' },
+        { id: 'd', text: '커스텀 keep-alive 이벤트' },
+      ],
+      answer: 'b',
+      explain:
+        '콜론으로 시작하는 라인은 comment로 무시된다. 프록시가 연결을 안 끊게 하는 keep-alive ping 패턴.',
+    },
+  ]}
+/>
+
+## 다음 화 예고
+
+수요일 오후 데모를 하다가 사고가 났다. 발표 도중 회의실 와이파이가 한 번 끊겼다 잡혔는데… 어, 챗봇이 멈춰있어야 할 텐데 알아서 다시 글자를 또르륵 뱉기 시작한다.
+
+> "어? 이거 제가 재연결 코드 안 짰는데요?"
+
+4화에서 자동 재연결과 `id:` 라인이 진짜로 무슨 일을 하는지 보자.

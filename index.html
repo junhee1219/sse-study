@@ -4,20 +4,101 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0d1117" />
+
+    <!-- Primary SEO -->
+    <title>냥사원의 SSE 분투기 — Server-Sent Events 한국어 인터랙티브 가이드</title>
     <meta
       name="description"
-      content="냥사원의 SSE 분투기. 옆 회사 챗봇처럼 글자가 또르륵 흘러나오게 만들고 싶은 신입의 5에피소드 사내 일지. Server-Sent Events를 손으로 만져보며 본질부터 익힌다."
+      content="Server-Sent Events(SSE)를 본질부터 손으로 만져보며 익히는 한국어 5에피소드 인터랙티브 가이드. 냥사원, 냥차장, 냥부장이 등장하는 사내 강의 컨셉. ChatGPT처럼 또르륵 흘러나오는 챗봇 만들기, EventSource, 자동 재연결, Last-Event-ID, nginx 버퍼링 등 실전 함정까지."
     />
-    <meta property="og:title" content="냥사원의 SSE 분투기" />
+    <meta
+      name="keywords"
+      content="SSE, Server-Sent Events, EventSource, 한국어 SSE 가이드, 챗봇 스트리밍, LLM 스트리밍, HTTP 스트리밍, Last-Event-ID, 자동 재연결, sse 튜토리얼, sse 강의, 인터랙티브 학습"
+    />
+    <meta name="author" content="Junhee Lee" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://junhee1219.github.io/sse-study/" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="냥사원의 SSE 분투기" />
+    <meta property="og:title" content="냥사원의 SSE 분투기 — Server-Sent Events 한국어 인터랙티브 가이드" />
     <meta
       property="og:description"
-      content="냥사원, 냥차장, 냥부장이 등장하는 냥테크 사내 SSE 강의. 옆 회사 챗봇처럼 또르륵 글자가 나오는 챗봇, 어떻게 만드는 거지? Server-Sent Events를 직접 만져보며 배우는 5에피소드."
+      content="ChatGPT처럼 또르륵 흘러나오는 챗봇 만들고 싶은 신입 냥사원의 좌충우돌 5에피소드. Server-Sent Events를 직접 만져보며 배우는 한국어 가이드."
     />
-    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://junhee1219.github.io/sse-study/" />
+    <meta property="og:image" content="https://junhee1219.github.io/sse-study/og.svg" />
+    <meta property="og:locale" content="ko_KR" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="냥사원의 SSE 분투기" />
+    <meta
+      name="twitter:description"
+      content="Server-Sent Events 한국어 인터랙티브 가이드. 5에피소드 동안 챗봇 스트리밍을 본질부터 만져본다."
+    />
+    <meta name="twitter:image" content="https://junhee1219.github.io/sse-study/og.svg" />
+
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-    <title>냥사원의 SSE 분투기</title>
+
+    <!-- Structured data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "LearningResource",
+      "name": "냥사원의 SSE 분투기",
+      "description": "Server-Sent Events(SSE)를 본질부터 손으로 만져보며 익히는 한국어 5에피소드 인터랙티브 가이드.",
+      "url": "https://junhee1219.github.io/sse-study/",
+      "inLanguage": "ko",
+      "educationalLevel": "intermediate",
+      "learningResourceType": "InteractiveTutorial",
+      "teaches": "Server-Sent Events, EventSource API, HTTP 스트리밍, LLM 토큰 스트리밍",
+      "timeRequired": "PT50M",
+      "author": {
+        "@type": "Person",
+        "name": "Junhee Lee",
+        "email": "leejunhee1219@snu.ac.kr"
+      },
+      "publisher": {
+        "@type": "Person",
+        "name": "Junhee Lee"
+      },
+      "hasPart": [
+        {
+          "@type": "LearningResource",
+          "name": "Ep.1 냥사원, 부장님 앞에서 챗봇 시연을 망치다",
+          "url": "https://junhee1219.github.io/sse-study/#/chapters/intro"
+        },
+        {
+          "@type": "LearningResource",
+          "name": "Ep.2 EventSource 한 줄의 정체",
+          "url": "https://junhee1219.github.io/sse-study/#/chapters/eventsource"
+        },
+        {
+          "@type": "LearningResource",
+          "name": "Ep.3 메시지 포맷 4가지 라인",
+          "url": "https://junhee1219.github.io/sse-study/#/chapters/frames"
+        },
+        {
+          "@type": "LearningResource",
+          "name": "Ep.4 자동 재연결과 Last-Event-ID",
+          "url": "https://junhee1219.github.io/sse-study/#/chapters/reconnect"
+        },
+        {
+          "@type": "LearningResource",
+          "name": "Ep.5 실전 함정 5개 + 챗봇 데모",
+          "url": "https://junhee1219.github.io/sse-study/#/chapters/production"
+        }
+      ]
+    }
+    </script>
   </head>
   <body>
+    <noscript>
+      이 페이지는 인터랙티브 데모 때문에 JavaScript가 켜져 있어야 동작합니다.
+      소스 코드는 https://github.com/junhee1219/sse-study 에서 볼 수 있습니다.
+    </noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

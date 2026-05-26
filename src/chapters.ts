@@ -30,7 +30,7 @@ export const chapters: ChapterMeta[] = [
     subtitle: '브라우저가 바이트를 메시지로 바꿔주는 방식, 들여다보기',
     estimatedMinutes: 10,
     prerequisites: ['intro'],
-    status: 'draft',
+    status: 'ready',
     Component: lazy(() => import('./content/02-eventsource.mdx')),
   },
   {
@@ -40,7 +40,7 @@ export const chapters: ChapterMeta[] = [
     subtitle: 'data · event · id · retry — 4가지 라인의 정체',
     estimatedMinutes: 9,
     prerequisites: ['eventsource'],
-    status: 'draft',
+    status: 'ready',
     Component: lazy(() => import('./content/03-frames.mdx')),
   },
   {
@@ -50,7 +50,7 @@ export const chapters: ChapterMeta[] = [
     subtitle: '자동 재연결과 Last-Event-ID로 잃어버린 메시지 되찾기',
     estimatedMinutes: 10,
     prerequisites: ['frames'],
-    status: 'draft',
+    status: 'ready',
     Component: lazy(() => import('./content/04-reconnect.mdx')),
   },
   {
@@ -60,7 +60,7 @@ export const chapters: ChapterMeta[] = [
     subtitle: 'proxy 버퍼링, 인증 헤더, HTTP/2, CORS — 그리고 진짜 챗봇 데모',
     estimatedMinutes: 12,
     prerequisites: ['reconnect'],
-    status: 'draft',
+    status: 'ready',
     Component: lazy(() => import('./content/05-production.mdx')),
   },
 ]
