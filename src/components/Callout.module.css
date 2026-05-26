@@ -1,0 +1,74 @@
+.callout {
+  border: 1px solid var(--border);
+  border-left-width: 4px;
+  border-radius: var(--radius-sm);
+  background: var(--panel);
+  padding: 14px 16px;
+  margin: 16px 0;
+}
+
+.callout[data-tone='info'] {
+  border-left-color: var(--accent);
+}
+.callout[data-tone='warn'] {
+  border-left-color: var(--warn);
+}
+.callout[data-tone='danger'] {
+  border-left-color: var(--danger);
+}
+.callout[data-tone='success'] {
+  border-left-color: var(--accent-2);
+}
+.callout[data-tone='story'] {
+  border-left-color: var(--branch-exp);
+  background: linear-gradient(180deg, rgba(210, 168, 255, 0.06), transparent 80%), var(--panel);
+}
+.callout[data-tone='aha'] {
+  border-left-color: var(--accent-2);
+  background: linear-gradient(180deg, var(--accent-2-soft), transparent 80%), var(--panel);
+}
+
+.head {
+  margin-bottom: 6px;
+}
+
+.tag {
+  display: inline-block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.callout[data-tone='info'] .tag {
+  color: var(--accent);
+}
+.callout[data-tone='warn'] .tag {
+  color: var(--warn);
+}
+.callout[data-tone='danger'] .tag {
+  color: var(--danger);
+}
+.callout[data-tone='success'] .tag {
+  color: var(--accent-2);
+}
+.callout[data-tone='story'] .tag {
+  color: var(--branch-exp);
+}
+.callout[data-tone='aha'] .tag {
+  color: var(--accent-2);
+}
+.callout[data-tone='story'] .body,
+.callout[data-tone='aha'] .body {
+  font-size: 1.02rem;
+  font-style: italic;
+  color: var(--text);
+}
+.callout[data-tone='aha'] .body {
+  font-style: normal;
+}
+
+.body :global(p:last-child) {
+  margin-bottom: 0;
+}

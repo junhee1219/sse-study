@@ -1,0 +1,32 @@
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.main {
+  flex: 1;
+  width: 100%;
+  margin: 0 auto;
+  padding: 28px 24px 64px;
+}
+
+.main[data-home='true'] {
+  max-width: var(--wide-width);
+}
+
+.main:not([data-home='true']) {
+  max-width: var(--wide-width);
+}
+
+.loading {
+  color: var(--muted);
+  padding: 48px 0;
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .main {
+    padding: 20px 16px 56px;
+  }
+}
