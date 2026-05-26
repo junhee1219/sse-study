@@ -7,7 +7,7 @@ export function SiteFooter() {
     <footer className={styles.footer}>
       <div className={styles.inner}>
         <span className={styles.muted}>
-          또르의 SSE 모험기 · 한국어 · 5에피소드
+          냥사원의 SSE 분투기 · 냥테크 사내 강의 · 5에피소드
         </span>
         <a
           href={REPO_URL}

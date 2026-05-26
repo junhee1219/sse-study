@@ -17,14 +17,15 @@ export function SiteHeader() {
       <div className={styles.inner}>
         <Link to="/" className={styles.brand}>
           <span className={styles.brandMark} aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
-              <circle cx="3.5" cy="12" r="1.8" fill="currentColor" opacity="0.45" />
-              <circle cx="9" cy="12" r="2.1" fill="currentColor" opacity="0.65" />
-              <circle cx="14.8" cy="12" r="2.4" fill="currentColor" opacity="0.85" />
-              <circle cx="20.6" cy="12" r="2.6" fill="currentColor" />
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+              <ellipse cx="6" cy="8" rx="1.7" ry="2.1" />
+              <ellipse cx="10.5" cy="6" rx="1.7" ry="2.1" />
+              <ellipse cx="15" cy="6" rx="1.7" ry="2.1" />
+              <ellipse cx="19" cy="8" rx="1.7" ry="2.1" />
+              <path d="M12.5 11c-3.4 0-5.6 2.6-5.6 5.2 0 1.9 1.5 3.4 3.3 3.4 1.1 0 1.5-.7 2.3-.7s1.2.7 2.3.7c1.8 0 3.3-1.5 3.3-3.4 0-2.6-2.2-5.2-5.6-5.2z" />
             </svg>
           </span>
-          <span className={styles.brandText}>또르의 SSE 모험기</span>
+          <span className={styles.brandText}>냥사원의 SSE 분투기</span>
         </Link>
 
         {currentIndex >= 0 && (

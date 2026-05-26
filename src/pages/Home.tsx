@@ -5,12 +5,12 @@ import styles from './Home.module.css'
 const differentiators = [
   {
     num: '01',
-    title: '주인공 또르가 안내',
-    body: '"내 챗봇도 또르륵 말 하게 하고 싶다." 또르의 좌충우돌 5에피소드를 따라가면서 SSE가 머리에 박힌다.',
+    title: '냥테크 사내 캐릭터',
+    body: '냥사원이 헤매고 냥차장이 함정을 짚어주고 냥부장이 한 마디로 정리한다. 회의실에 앉아있는 기분으로 5에피소드.',
   },
   {
     num: '02',
-    title: '바이트 단위로 본질부터',
+    title: '바이트 단위 본질부터',
     body: 'EventSource API 쓰는 법이 아니라, 그 안에서 어떤 바이트가 어떻게 흘러가는지부터.',
   },
   {
@@ -21,7 +21,7 @@ const differentiators = [
   {
     num: '04',
     title: '실전 함정까지',
-    body: 'nginx 버퍼링, 인증 헤더, HTTP/2 동시 연결 제한 — 또르가 실전에서 한 번씩 다 밟아본다.',
+    body: 'nginx 버퍼링, 인증 헤더, HTTP/2 동시 연결 제한 — 냥차장이 작년에 한 번씩 다 밟아본 함정.',
   },
 ]
 
@@ -39,17 +39,17 @@ export function Home() {
       <section className={styles.hero}>
         <div className={styles.eyebrow}>
           <span className={styles.eyebrowDot} />
-          전체 {chapters.length}에피소드 · 약 {totalMinutes}분
+          전체 {chapters.length}에피소드 · 약 {totalMinutes}분 · 냥테크 사내 강의
         </div>
         <h1 className={styles.title}>
-          또르의 챗봇은 왜 <em>또르륵</em> 말을 못 했을까.
+          냥사원의 챗봇은 왜 <em>또르륵</em> 말을 못 했을까.
         </h1>
         <p className={styles.lead}>
-          또르는 1인 챗봇 개발자다. 친구 <strong>지피티</strong>처럼 글자가
-          또르륵 또르륵 흘러나오는 챗봇을 만들고 싶다. 그런데 또르의 챗봇은
-          답을 한참 끓이다가 한 번에 떡 뱉는다. 도대체 뭐가 다른 거야?{' '}
-          <strong>Server-Sent Events</strong>를 만나기 직전 또르의 이야기에서
-          모험이 시작된다.
+          냥테크에 입사한 지 한 달째인 <strong>냥사원</strong>. 챗봇 사이드
+          프로젝트를 자랑스럽게 시연했는데, <strong>냥부장</strong>이 한 마디
+          던진다. "근데 옆 회사 챗봇은 글자가 또르륵 나오던데, 너 거는 왜 한 번에
+          뱉냐?" 그날부터 시작된 냥사원의 <strong>Server-Sent Events</strong>{' '}
+          분투기.
         </p>
         <div className={styles.heroActions}>
           <Link to={`/chapters/${chapters[0]!.slug}`} className={styles.btnPrimary}>
@@ -75,8 +75,8 @@ export function Home() {
         <div className={styles.sectionHead}>
           <h2 className={styles.sectionTitle}>에피소드 가이드</h2>
           <p className={styles.sectionLead}>
-            또르의 이야기는 순서대로 이어지지만, 익숙한 에피소드는 건너뛰어도
-            됩니다.
+            냥사원의 일주일치 이야기가 순서대로 이어집니다. 익숙한 에피소드는
+            건너뛰어도 OK.
           </p>
         </div>
         <div className={styles.cards}>

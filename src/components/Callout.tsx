@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import styles from './Callout.module.css'
 
-type Tone = 'info' | 'warn' | 'danger' | 'success' | 'story' | 'aha'
+type Tone = 'info' | 'warn' | 'danger' | 'success' | 'story' | 'aha' | 'boss' | 'senior'
 
 type Props = {
   tone?: Tone
@@ -14,8 +14,10 @@ const labels: Record<Tone, string> = {
   warn: '주의',
   danger: '함정',
   success: '핵심',
-  story: '또르의 한탄',
-  aha: '또르의 깨달음',
+  story: '냥사원의 한탄',
+  aha: '냥사원의 깨달음',
+  boss: '냥부장의 한 마디',
+  senior: '냥차장 메모',
 }
 
 export function Callout({ tone = 'info', title, children }: Props) {

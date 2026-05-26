@@ -27,6 +27,14 @@
   border-left-color: var(--accent-2);
   background: linear-gradient(180deg, var(--accent-2-soft), transparent 80%), var(--panel);
 }
+.callout[data-tone='boss'] {
+  border-left-color: var(--warn);
+  background: linear-gradient(180deg, var(--warn-soft), transparent 80%), var(--panel);
+}
+.callout[data-tone='senior'] {
+  border-left-color: var(--info);
+  background: linear-gradient(180deg, rgba(121, 192, 255, 0.08), transparent 80%), var(--panel);
+}
 
 .head {
   margin-bottom: 6px;
@@ -59,14 +67,26 @@
 .callout[data-tone='aha'] .tag {
   color: var(--accent-2);
 }
-.callout[data-tone='story'] .body,
-.callout[data-tone='aha'] .body {
+.callout[data-tone='boss'] .tag {
+  color: var(--warn);
+}
+.callout[data-tone='senior'] .tag {
+  color: var(--info);
+}
+
+.callout[data-tone='story'] .body {
   font-size: 1.02rem;
   font-style: italic;
   color: var(--text);
 }
 .callout[data-tone='aha'] .body {
-  font-style: normal;
+  font-size: 1.02rem;
+  color: var(--text);
+}
+.callout[data-tone='boss'] .body,
+.callout[data-tone='senior'] .body {
+  font-size: 1rem;
+  color: var(--text);
 }
 
 .body :global(p:last-child) {
